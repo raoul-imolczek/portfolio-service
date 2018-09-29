@@ -1,0 +1,6 @@
+Private-Package:\
+	eu.eisti.p2k19.fintech.portfolio.optimizer,\
+	eu.eisti.p2k19.fintech.portfolio.util
+	
+Include-Resource:\
+	@portfolio-optimizer-0.0.1-SNAPSHOT.jar!/*.csv	

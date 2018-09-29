@@ -1,0 +1,4 @@
+Export-Package:\
+	eu.eisti.p2k19.fintech.portfolio.service,\
+	eu.eisti.p2k19.fintech.portfolio.model,\
+	eu.eisti.p2k19.fintech.portfolio.exceptions
