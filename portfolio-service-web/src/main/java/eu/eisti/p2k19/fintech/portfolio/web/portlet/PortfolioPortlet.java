@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
+import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -27,6 +28,7 @@ import eu.eisti.p2k19.fintech.portfolio.service.PortfolioLocalService;
 				"javax.portlet.display-name=Portfolio Portlet",
 				"javax.portlet.init-param.template-path=/",
 				"javax.portlet.init-param.view-template=/view.jsp",
+				"javax.portlet.name=portfolio",
 				"javax.portlet.resource-bundle=content.Language",
 				"javax.portlet.security-role-ref=power-user,user"
 			},		
@@ -38,7 +40,10 @@ public class PortfolioPortlet extends MVCPortlet {
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse)
 			throws IOException, PortletException {
 
+		PortletURL selectSymbolsActionURL = renderResponse.createActionURL();
+		selectSymbolsActionURL.setParameter("javax.portlet.action", "/portfolio/calculate");
 		
+		renderRequest.setAttribute("selectSymbolsActionURL", selectSymbolsActionURL.toString());
 		
 		try {
 			renderRequest.setAttribute("symbols", portfolioLocalService.getSymbols());
