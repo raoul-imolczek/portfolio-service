@@ -12,6 +12,7 @@ import javax.portlet.PortletException;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
 
@@ -27,10 +28,10 @@ import eu.eisti.p2k19.fintech.portfolio.service.PortfolioLocalService;
 	    	    },		
 		service = MVCActionCommand.class
 		)
-public class CalculatePortfolioMVCActionCommand implements MVCActionCommand {
+public class CalculatePortfolioMVCActionCommand extends BaseMVCActionCommand {
 
 	@Override
-	public boolean processAction(ActionRequest actionRequest, ActionResponse actionResponse) throws PortletException {
+	public void doProcessAction(ActionRequest actionRequest, ActionResponse actionResponse) throws PortletException {
 
 		Map<String, String[]> map = actionRequest.getParameterMap();
 		
@@ -41,24 +42,29 @@ public class CalculatePortfolioMVCActionCommand implements MVCActionCommand {
 		Iterator<String> fieldIterator = map.keySet().iterator();
 		while(fieldIterator.hasNext()) {
 			String field = fieldIterator.next();
-			System.out.println("FIELD: " + field);
 			if(field.startsWith("SYMBOL_") && ParamUtil.getBoolean(actionRequest, field, false)) {
 				String symbol = field.substring(7);
 				symbols.add(symbol);
 			}
 		}
-
-		System.out.println("ACTION: " + symbols.size());
 		
 		try {
-			portfolioLocalService.getOptimalVarianceWeights(symbols, expectedPortfolioProfitability);
+			Map<String, Double> optimalPortfolio = portfolioLocalService.getOptimalVarianceWeights(symbols, expectedPortfolioProfitability);
+			
+			List<Map<String, Double>> portfolios; 
+			portfolios = (List<Map<String, Double>>) actionRequest.getPortletSession().getAttribute("portfolios");
+			if (portfolios == null) {
+				portfolios = new ArrayList<Map<String, Double>> ();
+				actionRequest.getPortletSession().setAttribute("portfolios", portfolios);
+			}
+			portfolios.add(optimalPortfolio);
+			actionResponse.setRenderParameter("portfolioId", new StringBuffer().append(portfolios.size() - 1).toString());
+			actionResponse.setRenderParameter("expectedPortfolioProfitability", new StringBuffer().append(expectedPortfolioProfitability).toString());
+			
 		} catch (IncorrectQuotationsFileException | IncorrectProfitabilityFileException e) {
 			throw new PortletException();
 		}
 		
-		actionResponse.setRenderParameter("mvcPath", "portfolio.jsp");
-		
-		return false;
 	}
 	
 	@Reference
